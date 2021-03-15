@@ -7,3 +7,5 @@
 - Export JS constants, variables, functions, classes etc. with `module.exports = myObject`
 - Import JS entities with `require(./myModule)`
 - Use the `express.Router` class to create modular, mountable route handlers.
+- Create a `controllers` folder to store all our controllers.
+- Import the `userController` in the router module to render the home page.
