@@ -1,0 +1,6 @@
+- Initial setup:
+  - `npm init -y`
+  - `eslint --init`
+- Configure templates folder and template engine.
+- Install ejs npm module: `npm install ejs`.
+- Indicate express to use static files in the public folder: `app.use(express.static("public"))`.
