@@ -4,3 +4,6 @@
 - Configure templates folder and template engine.
 - Install ejs npm module: `npm install ejs`.
 - Indicate express to use static files in the public folder: `app.use(express.static("public"))`.
+- Export JS constants, variables, functions, classes etc. with `module.exports = myObject`
+- Import JS entities with `require(./myModule)`
+- Use the `express.Router` class to create modular, mountable route handlers.

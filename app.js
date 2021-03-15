@@ -1,4 +1,5 @@
 const express = require("express");
+const router = require("./router");
 
 const app = express();
 
@@ -8,10 +9,8 @@ app.use(express.static("public"));
 app.set("views", "views");
 // Indicate express where which template engine to use
 app.set("view engine", "ejs");
-
-app.get("/", function (req, res) {
-  res.render("home-guest");
-});
+// App will handle requests using the router defined in router.js
+app.use("/", router);
 
 app.listen(3000, () => {
   console.log("Listening on port 3000");
