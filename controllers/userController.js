@@ -1,7 +1,17 @@
+const User = require("../models/User");
+
 exports.home = function (req, res) {
   res.render("home-guest");
 };
 
 exports.register = function (req, res) {
-  res.send("Thanks for trying to register");
+  console.log("Data submitted", req.body);
+  const user = new User(req.body);
+  try {
+    user.register();
+    res.send("Registration ok");
+  } catch (err) {
+    console.log(err.message);
+    res.redirect("/");
+  }
 };

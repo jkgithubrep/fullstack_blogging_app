@@ -9,3 +9,5 @@
 - Use the `express.Router` class to create modular, mountable route handlers.
 - Create a `controllers` folder to store all our controllers.
 - Import the `userController` in the router module to render the home page.
+- Create a `models` folder and add the `User` model.
+- Add synchronous code to clean and validate data submitted.
