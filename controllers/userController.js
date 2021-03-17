@@ -9,7 +9,7 @@ exports.register = function (req, res) {
   const user = new User(req.body);
   try {
     user.register();
-    res.send("Registration ok");
+    res.send("User successfully registered");
   } catch (err) {
     console.log(err.message);
     res.redirect("/");

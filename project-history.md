@@ -11,3 +11,5 @@
 - Import the `userController` in the router module to render the home page.
 - Create a `models` folder and add the `User` model.
 - Add synchronous code to clean and validate data submitted.
+- Install the mongodb npm package: `npm install mongodb`
+- Open a connection to a mongodb database in Atlas.

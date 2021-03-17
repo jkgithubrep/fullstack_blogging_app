@@ -1,3 +1,4 @@
+const userCollection = require("../db").collection("users");
 const validator = require("validator");
 
 class User {
@@ -47,6 +48,7 @@ class User {
   register() {
     this.cleanUp();
     this.validate();
+    userCollection.insertOne(this.data);
   }
 }
 
