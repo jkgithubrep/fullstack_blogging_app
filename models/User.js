@@ -1,9 +1,10 @@
-const userCollection = require("../db").collection("users");
+const usersCollection = require("../db").collection("users");
 const validator = require("validator");
 
 class User {
   constructor(data) {
     this.data = data;
+    this.errors = [];
   }
 
   cleanUp() {
@@ -45,10 +46,22 @@ class User {
     console.log("User is valid");
   }
 
-  register() {
+  async register() {
     this.cleanUp();
     this.validate();
-    userCollection.insertOne(this.data);
+    await usersCollection.insertOne(this.data);
+  }
+
+  async login() {
+    this.cleanUp();
+    const userFound = await usersCollection.findOne({
+      username: this.data.username,
+    });
+    if (userFound) {
+      return;
+    } else {
+      throw new Error("Invalid username or password ");
+    }
   }
 }
 

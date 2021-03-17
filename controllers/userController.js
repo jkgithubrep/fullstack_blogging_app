@@ -7,11 +7,27 @@ exports.home = function (req, res) {
 exports.register = function (req, res) {
   console.log("Data submitted", req.body);
   const user = new User(req.body);
-  try {
-    user.register();
-    res.send("User successfully registered");
-  } catch (err) {
-    console.log(err.message);
-    res.redirect("/");
-  }
+  user
+    .register()
+    .then(() => {
+      res.send("User successfully registered");
+    })
+    .catch((err) => {
+      console.log(err.message);
+      res.redirect("/");
+    });
+};
+
+exports.login = function (req, res) {
+  const user = new User(req.body);
+  user
+    .login()
+    .then(() => {
+      console.log("User successfully logged in");
+      res.send("You're logged in");
+    })
+    .catch((err) => {
+      console.log(err.message);
+      res.redirect("/");
+    });
 };
