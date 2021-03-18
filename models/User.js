@@ -1,5 +1,5 @@
 const { ValidationError } = require("../errors");
-const usersCollection = require("../db").collection("users");
+const usersCollection = require("../db").db().collection("users");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const saltRounds = 10;

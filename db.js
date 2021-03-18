@@ -17,7 +17,7 @@ async function connectDB() {
     // Establish and verify connection
     await client.db("admin").command({ ping: 1 });
 
-    module.exports = client.db();
+    module.exports = client;
     console.log("Connected successfully to the database server");
   } catch (err) {
     await client.close();

@@ -2,7 +2,11 @@ const { ValidationError } = require("../errors");
 const User = require("../models/User");
 
 exports.home = function (req, res) {
-  res.render("home-guest");
+  if (req.session.user) {
+    res.render("home-dashboard", { username: req.session.user.username });
+  } else {
+    res.render("home-guest");
+  }
 };
 
 exports.register = function (req, res) {
@@ -27,11 +31,20 @@ exports.login = function (req, res) {
   user
     .login()
     .then(() => {
-      console.log("User successfully logged in");
-      res.send("You're logged in");
+      req.session.user = { username: user.data.username };
+      req.session.save((err) => {
+        if (err) console.log(err);
+        res.redirect("/");
+      });
     })
     .catch((err) => {
       console.log(err.message);
       res.redirect("/");
     });
+};
+
+exports.logout = function (req, res) {
+  req.session.destroy(() => {
+    res.redirect("/");
+  });
 };

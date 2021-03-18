@@ -15,3 +15,5 @@
 - Open a connection to a mongodb database in Atlas.
 - Verify data submitted when user register.
 - Use bcrypt npm package to store hash instead of plain passwords in the db.
+- Install `express-session` npm package to manage user authentication with sessions.
+- Install `connect-mongo` npm package to store sessions in mongo.
