@@ -1,3 +1,4 @@
+const { ValidationError } = require("../errors");
 const usersCollection = require("../db").collection("users");
 const validator = require("validator");
 
@@ -24,31 +25,36 @@ class User {
     }
   }
 
-  verifyUsername() {
+  async verifyUsername() {
     const { username } = this.data;
-    if (username == "") throw new Error("Username can not be empty.");
+    if (username == "") throw new ValidationError("Username can not be empty.");
     if (!validator.isAlphanumeric(username))
-      throw new Error("Username can only contain letters and numbers.");
+      throw new ValidationError(
+        "Username can only contain letters and numbers."
+      );
     if (username.length < 3)
-      throw new Error("Username should have at least 3 characters.");
+      throw new ValidationError("Username should have at least 3 characters.");
     if (username.length > 50)
-      throw new Error("Username should not exceed 50 characters.");
+      throw new ValidationError("Username should not exceed 50 characters.");
+    const userFound = await usersCollection.findOne({ username: username });
+    if (userFound) throw new ValidationError("Username already exists.");
   }
 
   verifyEmail() {
     const { email } = this.data;
-    if (!validator.isEmail(email)) throw new Error("Invalid email address.");
+    if (!validator.isEmail(email))
+      throw new ValidationError("Invalid email address.");
   }
 
-  validate() {
-    this.verifyUsername();
+  async validate() {
+    await this.verifyUsername();
     this.verifyEmail();
     console.log("User is valid");
   }
 
   async register() {
     this.cleanUp();
-    this.validate();
+    await this.validate();
     await usersCollection.insertOne(this.data);
   }
 
@@ -60,7 +66,7 @@ class User {
     if (userFound) {
       return;
     } else {
-      throw new Error("Invalid username or password ");
+      throw new ValidationError("Invalid username or password ");
     }
   }
 }

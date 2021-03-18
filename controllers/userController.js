@@ -1,3 +1,4 @@
+const { ValidationError } = require("../errors");
 const User = require("../models/User");
 
 exports.home = function (req, res) {
@@ -13,8 +14,11 @@ exports.register = function (req, res) {
       res.send("User successfully registered");
     })
     .catch((err) => {
-      console.log(err.message);
-      res.redirect("/");
+      if (err instanceof ValidationError) {
+        res.send(err.message);
+      } else {
+        res.redirect("/");
+      }
     });
 };
 
