@@ -13,3 +13,5 @@
 - Add synchronous code to clean and validate data submitted.
 - Install the mongodb npm package: `npm install mongodb`
 - Open a connection to a mongodb database in Atlas.
+- Verify data submitted when user register.
+- Use bcrypt npm package to store hash instead of plain passwords in the db.
