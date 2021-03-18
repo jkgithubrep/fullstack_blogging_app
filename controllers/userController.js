@@ -5,7 +5,10 @@ exports.home = function (req, res) {
   if (req.session.user) {
     res.render("home-dashboard", { username: req.session.user.username });
   } else {
-    res.render("home-guest");
+    res.render("home-guest", {
+      errors: req.flash("errors"),
+      regErrors: req.flash("regErrors"),
+    });
   }
 };
 
@@ -15,14 +18,20 @@ exports.register = function (req, res) {
   user
     .register()
     .then(() => {
-      res.send("User successfully registered");
+      req.session.user = { username: user.data.username };
+      req.session.save(() => {
+        res.redirect("/");
+      });
     })
     .catch((err) => {
       if (err instanceof ValidationError) {
-        res.send(err.message);
+        req.flash("regErrors", err.message);
       } else {
-        res.redirect("/");
+        req.flash("regErrors", "Please try again later.");
       }
+      req.session.save(() => {
+        res.redirect("/");
+      });
     });
 };
 
@@ -38,8 +47,10 @@ exports.login = function (req, res) {
       });
     })
     .catch((err) => {
-      console.log(err.message);
-      res.redirect("/");
+      req.flash("errors", err.message);
+      req.session.save(() => {
+        res.redirect("/");
+      });
     });
 };
 

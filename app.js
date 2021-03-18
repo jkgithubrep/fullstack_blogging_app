@@ -1,6 +1,7 @@
 const express = require("express");
 const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
+const flash = require("connect-flash");
 const router = require("./router");
 
 const app = express();
@@ -18,6 +19,9 @@ let sessionOptions = {
   },
 };
 app.use(session(sessionOptions));
+
+// Use flash middleware to handle flash messages
+app.use(flash());
 
 /**
  * Use built-in middleware to parse incoming requests with urlencoded payloads.

@@ -17,3 +17,4 @@
 - Use bcrypt npm package to store hash instead of plain passwords in the db.
 - Install `express-session` npm package to manage user authentication with sessions.
 - Install `connect-mongo` npm package to store sessions in mongo.
+- Install `connect-flash` npm package to add flash messages.
