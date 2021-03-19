@@ -10,3 +10,15 @@
   <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
+  <header class="header-bar mb-3">
+    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between p-3">
+      <h4 class="my-0 mr-md-auto font-weight-normal"><a href="/" class="text-white logo-text">OurApp</a></h4>
+
+      <% if (user) { %>
+        <%- include("nav-loggedin") %>
+      <% } else { %>
+        <%- include("nav-guest") %>
+      <% } %>
+    </div>
+  </header>
+  <!-- header ends here -->
