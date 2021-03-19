@@ -19,3 +19,7 @@
 - Install `connect-mongo` npm package to store sessions in mongo.
 - Install `connect-flash` npm package to add flash messages.
 - Automatically get user profile image from gravatar.
+- Use `res.locals` to make user info available when rendering ejs templates
+- Add mustBeLoggedIn middleware in routes where user must be logged in.
+- Add a get and a post route to go to the creation page and create a new post.
+- Add basic validation to insert the post in the database.
