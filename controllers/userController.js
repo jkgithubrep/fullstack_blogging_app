@@ -42,6 +42,7 @@ exports.register = function (req, res) {
         req.flash("regErrors", err.message);
       } else {
         req.flash("regErrors", "Please try again later.");
+        console.log(err);
       }
       req.session.save(() => {
         res.redirect("/");
@@ -64,7 +65,12 @@ exports.login = function (req, res) {
       });
     })
     .catch((err) => {
-      req.flash("errors", err.message);
+      if (err instanceof ValidationError) {
+        req.flash("errors", err.message);
+      } else {
+        req.flash("errors", "Please try again later.");
+        console.log(err);
+      }
       req.session.save(() => {
         res.redirect("/");
       });
