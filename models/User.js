@@ -14,18 +14,18 @@ class User {
   cleanUp() {
     const data = this.data;
 
+    // Sanitize data
+    const entries = Object.entries(data);
+    for (const [key, value] of entries) {
+      if (typeof value !== "string") data[key] = "";
+    }
+
     // Remove bogus properties
     this.data = {
       username: data.username ? data.username.trim().toLowerCase() : "",
       email: data.email ? data.email.trim().toLowerCase() : "",
       password: data.password,
     };
-
-    // Sanitize data
-    const entries = Object.entries(data);
-    for (const [key, value] of entries) {
-      if (typeof value !== "string") data[key] = "";
-    }
   }
 
   async verifyUsername() {
