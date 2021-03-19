@@ -3,6 +3,7 @@ const usersCollection = require("../db").db().collection("users");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const saltRounds = 10;
+const md5 = require("md5");
 
 class User {
   constructor(data) {
@@ -58,6 +59,12 @@ class User {
       throw new ValidationError("Password should not exceed 50 characters.");
   }
 
+  getGravatar() {
+    this.gravatar = `https://www.gravatar.com/avatar/${md5(
+      this.data.email
+    )}?s=128`;
+  }
+
   async validate() {
     await this.verifyUsername();
     await this.verifyEmail();
@@ -69,6 +76,7 @@ class User {
     await this.validate();
     this.data.password = await bcrypt.hash(this.data.password, saltRounds);
     await usersCollection.insertOne(this.data);
+    this.getGravatar();
   }
 
   async login() {
@@ -79,6 +87,8 @@ class User {
     if (!userFound) throw new ValidationError("Invalid username or password ");
     const match = await bcrypt.compare(this.data.password, userFound.password);
     if (!match) throw new ValidationError("Invalid username or password");
+    this.data = userFound;
+    this.getGravatar();
   }
 }
 
