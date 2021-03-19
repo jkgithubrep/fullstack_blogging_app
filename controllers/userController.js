@@ -14,10 +14,7 @@ exports.mustBeLoggedIn = function (req, res, next) {
 
 exports.home = function (req, res) {
   if (req.session.user) {
-    res.render("home-dashboard", {
-      username: req.session.user.username,
-      gravatar: req.session.user.gravatar,
-    });
+    res.render("home-dashboard");
   } else {
     res.render("home-guest", {
       errors: req.flash("errors"),

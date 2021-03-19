@@ -46,6 +46,16 @@ app.set("views", "views");
 // Indicate express where which template engine to use.
 app.set("view engine", "ejs");
 
+/**
+ * Add middleware to store user session info in the response local variable
+ * and therefore make it available to the views rendered during that request /
+ * response cycle.
+ */
+app.use(function (req, res, next) {
+  res.locals.user = req.session.user;
+  next();
+});
+
 // App will handle requests using the router defined in router.js.
 app.use("/", router);
 
