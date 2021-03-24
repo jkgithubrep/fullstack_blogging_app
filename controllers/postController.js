@@ -13,7 +13,6 @@ exports.create = function (req, res) {
       res.send("Post successfully created");
     })
     .catch((err) => {
-      console.log(err);
       if (err instanceof ValidationError) {
         req.flash("postErrors", err.message);
       } else {

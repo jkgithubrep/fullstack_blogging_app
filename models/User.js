@@ -76,6 +76,8 @@ class User {
     await this.validate();
     this.data.password = await bcrypt.hash(this.data.password, saltRounds);
     await usersCollection.insertOne(this.data);
+    // By calling the insertOne method, a property _id has been automatically
+    // added to this.data
     this.getGravatar();
   }
 
