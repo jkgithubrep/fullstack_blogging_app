@@ -22,4 +22,8 @@ router.post(
   postController.create
 );
 
+// The route parameter "id" will be available in the req.params object
+// See: https://expressjs.com/en/guide/routing.html#route-parameters
+router.get("/post/:id", postController.viewSingle);
+
 module.exports = router;

@@ -5,6 +5,7 @@ function saveSessionAfterLoginOrRegister(req, res, user) {
   req.session.user = {
     gravatar: user.gravatar,
     username: user.data.username,
+    userId: user.data._id,
   };
   req.session.save((err) => {
     if (err) console.log(err);
