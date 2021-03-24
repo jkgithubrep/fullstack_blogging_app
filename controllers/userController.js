@@ -1,6 +1,29 @@
 const { ValidationError } = require("../errors");
 const User = require("../models/User");
 
+function saveSessionAfterLoginOrRegister(req, res, user) {
+  req.session.user = {
+    gravatar: user.gravatar,
+    username: user.data.username,
+  };
+  req.session.save((err) => {
+    if (err) console.log(err);
+    res.redirect("/");
+  });
+}
+
+function handleErrorWhenLoginOrRegister(req, res, err, action) {
+  if (err instanceof ValidationError) {
+    req.flash(action === "login" ? "errors" : "regErrors", err.message);
+  } else {
+    req.flash("errors", "Please try again later.");
+    console.log(err);
+  }
+  req.session.save(() => {
+    res.redirect("/");
+  });
+}
+
 exports.mustBeLoggedIn = function (req, res, next) {
   if (req.session.user) {
     next();
@@ -29,24 +52,10 @@ exports.register = function (req, res) {
   user
     .register()
     .then(() => {
-      req.session.user = {
-        gravatar: user.gravatar,
-        username: user.data.username,
-      };
-      req.session.save(() => {
-        res.redirect("/");
-      });
+      saveSessionAfterLoginOrRegister(req, res, user);
     })
     .catch((err) => {
-      if (err instanceof ValidationError) {
-        req.flash("regErrors", err.message);
-      } else {
-        req.flash("regErrors", "Please try again later.");
-        console.log(err);
-      }
-      req.session.save(() => {
-        res.redirect("/");
-      });
+      handleErrorWhenLoginOrRegister(req, res, err, "register");
     });
 };
 
@@ -55,25 +64,10 @@ exports.login = function (req, res) {
   user
     .login()
     .then(() => {
-      req.session.user = {
-        gravatar: user.gravatar,
-        username: user.data.username,
-      };
-      req.session.save((err) => {
-        if (err) console.log(err);
-        res.redirect("/");
-      });
+      saveSessionAfterLoginOrRegister(req, res, user);
     })
     .catch((err) => {
-      if (err instanceof ValidationError) {
-        req.flash("errors", err.message);
-      } else {
-        req.flash("errors", "Please try again later.");
-        console.log(err);
-      }
-      req.session.save(() => {
-        res.redirect("/");
-      });
+      handleErrorWhenLoginOrRegister(req, res, err, "login");
     });
 };
 
