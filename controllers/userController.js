@@ -1,4 +1,5 @@
 const { ValidationError } = require("../errors");
+const Post = require("../models/Post");
 const User = require("../models/User");
 
 function saveSessionAfterLoginOrRegister(req, res, user) {
@@ -91,10 +92,16 @@ exports.ifUserExists = async function (req, res, next) {
   }
 };
 
-exports.displayProfileScreen = function (req, res) {
-  if (req.userFound) {
-    res.render("profile", { profile: req.userFound });
-  } else {
+exports.displayProfileScreen = async function (req, res) {
+  try {
+    if (req.userFound) {
+      const userPosts = await Post.findByAuthorId(req.userFound._id);
+      res.render("profile", { profile: req.userFound, posts: userPosts });
+    } else {
+      res.render("404");
+    }
+  } catch (err) {
+    console.log(err);
     res.render("404");
   }
 };

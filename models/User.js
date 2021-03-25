@@ -12,6 +12,7 @@ class User {
       userFound = new User(userFound);
       userFound.getGravatar();
       userFound = {
+        _id: userFound.data._id,
         username: userFound.data.username,
         gravatar: userFound.gravatar,
       };

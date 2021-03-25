@@ -4,46 +4,58 @@ const User = require("./User");
 const postsCollection = require("../db").db().collection("posts");
 
 class Post {
-  static async findSingleById(id) {
-    if (typeof id !== "string" || !ObjectID.isValid(id)) {
+  static async reusablePostQuery(uniqueOperations) {
+    const commonOperations = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorDoc",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          body: 1,
+          createdDate: 1,
+          author: {
+            $arrayElemAt: ["$authorDoc", 0],
+          },
+        },
+      },
+      {
+        $project: {
+          author: {
+            password: 0,
+          },
+        },
+      },
+    ];
+    const aggOperations = [...uniqueOperations, ...commonOperations];
+    const posts = await postsCollection.aggregate(aggOperations).toArray();
+    return posts;
+  }
+
+  static async findSingleById(postId) {
+    if (typeof postId !== "string" || !ObjectID.isValid(postId)) {
       throw new RequestParamError("Invalid post id");
     }
-    const posts = await postsCollection
-      .aggregate([
-        { $match: { _id: new ObjectID(id) } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "author",
-            foreignField: "_id",
-            as: "authorDoc",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: [{ $arrayElemAt: ["$authorDoc", 0] }, "$$ROOT"],
-            },
-          },
-        },
-        {
-          $project: {
-            title: 1,
-            body: 1,
-            createdDate: 1,
-            author: {
-              username: "$username",
-              email: "$email",
-            },
-          },
-        },
-      ])
-      .toArray();
+    const posts = await this.reusablePostQuery([
+      { $match: { _id: new ObjectID(postId) } },
+    ]);
     let post = posts[0];
     post.author.gravatar = new User({
       email: post.author.email,
     }).getGravatar().gravatar;
     return new Post(post);
+  }
+
+  static async findByAuthorId(authorId) {
+    return await this.reusablePostQuery([
+      { $match: { author: authorId } },
+      { $sort: { createdDate: -1 } },
+    ]);
   }
 
   constructor(data, userId) {
