@@ -1,5 +1,6 @@
 const { ValidationError, RequestParamError } = require("../errors");
 const { ObjectID } = require("mongodb");
+const User = require("./User");
 const postsCollection = require("../db").db().collection("posts");
 
 class Post {
@@ -7,13 +8,47 @@ class Post {
     if (typeof id !== "string" || !ObjectID.isValid(id)) {
       throw new RequestParamError("Invalid post id");
     }
-    const postData = await postsCollection.findOne({ _id: new ObjectID(id) });
-    return new Post(postData);
+    const posts = await postsCollection
+      .aggregate([
+        { $match: { _id: new ObjectID(id) } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "author",
+            foreignField: "_id",
+            as: "authorDoc",
+          },
+        },
+        {
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [{ $arrayElemAt: ["$authorDoc", 0] }, "$$ROOT"],
+            },
+          },
+        },
+        {
+          $project: {
+            title: 1,
+            body: 1,
+            createdDate: 1,
+            author: {
+              username: "$username",
+              email: "$email",
+            },
+          },
+        },
+      ])
+      .toArray();
+    let post = posts[0];
+    post.author.gravatar = new User({
+      email: post.author.email,
+    }).getGravatar().gravatar;
+    return new Post(post);
   }
 
   constructor(data, userId) {
     this.data = data;
-    this.userId = new ObjectID(userId);
+    this.userId = userId ? new ObjectID(userId) : null;
   }
 
   cleanUp() {
@@ -46,7 +81,6 @@ class Post {
 
   formatDateForDisplay() {
     const date = this.data.createdDate;
-    console.log(date);
     this.data.dateFormatted = date
       ? `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
       : "";
