@@ -1,4 +1,4 @@
-const { ValidationError } = require("../errors");
+const { ValidationError, RequestParamError } = require("../errors");
 const usersCollection = require("../db").db().collection("users");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
@@ -6,6 +6,21 @@ const saltRounds = 10;
 const md5 = require("md5");
 
 class User {
+  static async findUserByUsername(username) {
+    let userFound = await usersCollection.findOne({ username: username });
+    if (userFound) {
+      userFound = new User(userFound);
+      userFound.getGravatar();
+      userFound = {
+        username: userFound.data.username,
+        gravatar: userFound.gravatar,
+      };
+      return userFound;
+    } else {
+      throw new RequestParamError("Invalid username");
+    }
+  }
+
   constructor(data) {
     this.data = data;
     this.errors = [];

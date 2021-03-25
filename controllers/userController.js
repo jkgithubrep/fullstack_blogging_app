@@ -77,3 +77,24 @@ exports.logout = function (req, res) {
     res.redirect("/");
   });
 };
+
+exports.ifUserExists = async function (req, res, next) {
+  try {
+    let userFound = await User.findUserByUsername(req.params.username);
+    if (userFound) {
+      req.userFound = userFound;
+      next();
+    }
+  } catch (err) {
+    console.log(err);
+    res.render("404");
+  }
+};
+
+exports.displayProfileScreen = function (req, res) {
+  if (req.userFound) {
+    res.render("profile", { profile: req.userFound });
+  } else {
+    res.render("404");
+  }
+};
