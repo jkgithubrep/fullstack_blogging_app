@@ -19,7 +19,7 @@ router.get(
 router.get(
   "/create-post",
   userController.mustBeLoggedIn,
-  postController.viewCreateScreen
+  postController.displayCreateScreen
 );
 
 router.post(
@@ -30,6 +30,16 @@ router.post(
 
 // The route parameter "id" will be available in the req.params object
 // See: https://expressjs.com/en/guide/routing.html#route-parameters
-router.get("/post/:id", postController.viewSingle);
+router.get("/post/:id", postController.displayViewSingleScreen);
+router.get(
+  "/post/:id/edit",
+  userController.mustBeLoggedIn,
+  postController.displayEditScreen
+);
+router.post(
+  "/post/:id/edit",
+  userController.mustBeLoggedIn,
+  postController.edit
+);
 
 module.exports = router;

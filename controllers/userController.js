@@ -42,14 +42,12 @@ exports.home = function (req, res) {
     res.render("home-dashboard");
   } else {
     res.render("home-guest", {
-      errors: req.flash("errors"),
       regErrors: req.flash("regErrors"),
     });
   }
 };
 
 exports.register = function (req, res) {
-  console.log("Data submitted", req.body);
   const user = new User(req.body);
   user
     .register()

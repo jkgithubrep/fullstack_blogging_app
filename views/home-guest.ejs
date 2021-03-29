@@ -2,11 +2,7 @@
 
 <div class="container py-md-5">
 
-  <% errors.forEach((message) => { %>
-    <div class="alert alert-danger text-center">
-      <%= message %>
-    </div>
-  <% }) %>
+  <%- include('partials/flash-messages') %>
 
   <div class="row align-items-center">
 

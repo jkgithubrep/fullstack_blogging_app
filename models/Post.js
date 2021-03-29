@@ -39,17 +39,19 @@ class Post {
 
   static async findSingleById(postId, visitorId) {
     if (typeof postId !== "string" || !ObjectID.isValid(postId)) {
-      throw new RequestParamError("Invalid post id");
+      throw new RequestParamError("Invalid post id.");
     }
     const posts = await this.reusablePostQuery([
       { $match: { _id: new ObjectID(postId) } },
     ]);
     let post = posts[0];
+    // Valid mongodb id but post id not found in the database
+    if (!post) throw new RequestParamError("Invalid post id.");
     post.isOwnedByVisitor = post.author._id.equals(visitorId);
     post.author.gravatar = new User({
       email: post.author.email,
     }).getGravatar().gravatar;
-    return new Post(post);
+    return new Post(post, visitorId, postId);
   }
 
   static async findByAuthorId(authorId) {
@@ -59,9 +61,12 @@ class Post {
     ]);
   }
 
-  constructor(data, userId) {
+  constructor(data, userId, requestedPostId) {
     this.data = data;
     this.userId = userId ? new ObjectID(userId) : null;
+    this.requestedPostId = requestedPostId
+      ? new ObjectID(requestedPostId)
+      : null;
   }
 
   cleanUp() {
@@ -104,6 +109,20 @@ class Post {
     this.validate();
     this.addMetaData();
     await postsCollection.insertOne(this.data);
+  }
+
+  async update() {
+    this.cleanUp();
+    this.validate();
+    await postsCollection.findOneAndUpdate(
+      { _id: this.requestedPostId },
+      {
+        $set: {
+          title: this.data.title,
+          body: this.data.body,
+        },
+      }
+    );
   }
 }
 
