@@ -52,6 +52,7 @@ app.set("view engine", "ejs");
  * response cycle.
  */
 app.use(function (req, res, next) {
+  req.visitorId = req.session.user ? req.session.user.userId : 0;
   res.locals.user = req.session.user;
   next();
 });

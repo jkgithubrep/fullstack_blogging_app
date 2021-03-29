@@ -27,7 +27,7 @@ exports.create = function (req, res) {
 
 exports.viewSingle = async function (req, res) {
   try {
-    let post = await Post.findSingleById(req.params.id);
+    let post = await Post.findSingleById(req.params.id, req.visitorId);
     post.formatDateForDisplay();
     res.render("single-post", { post: post.data });
   } catch (err) {

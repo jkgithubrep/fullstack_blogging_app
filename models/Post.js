@@ -37,7 +37,7 @@ class Post {
     return posts;
   }
 
-  static async findSingleById(postId) {
+  static async findSingleById(postId, visitorId) {
     if (typeof postId !== "string" || !ObjectID.isValid(postId)) {
       throw new RequestParamError("Invalid post id");
     }
@@ -45,6 +45,7 @@ class Post {
       { $match: { _id: new ObjectID(postId) } },
     ]);
     let post = posts[0];
+    post.isOwnedByVisitor = post.author._id.equals(visitorId);
     post.author.gravatar = new User({
       email: post.author.email,
     }).getGravatar().gravatar;
