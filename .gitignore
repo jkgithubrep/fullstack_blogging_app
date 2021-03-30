@@ -7,6 +7,8 @@ fontawesome-free-5.15.2-web
 # HTML templates
 html_templates
 
+public/main-bundled.js
+
 # Build
 server/build/*
 
