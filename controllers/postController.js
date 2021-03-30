@@ -118,3 +118,12 @@ exports.delete = async function (req, res) {
     req.session.save(() => res.redirect("/"));
   }
 };
+
+exports.search = async function (req, res) {
+  try {
+    let posts = await Post.findByTitle(req.body.searchTerms);
+    res.send(posts);
+  } catch (err) {
+    console.log(err);
+  }
+};

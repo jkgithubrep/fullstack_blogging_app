@@ -62,6 +62,20 @@ class Post {
     ]);
   }
 
+  static async findByTitle(pattern) {
+    let posts = await this.reusablePostQuery([
+      { $match: { title: { $regex: new RegExp(pattern), $options: "i" } } },
+    ]);
+    posts.forEach((post, index) => {
+      post.author.gravatar = new User({
+        email: post.author.email,
+      }).getGravatar().gravatar;
+      posts[index] = new Post(post);
+      posts[index].formatDateForDisplay();
+    });
+    return posts;
+  }
+
   constructor(data, userId, requestedPostId) {
     this.data = data;
     this.userId = userId ? new ObjectID(userId) : null;
