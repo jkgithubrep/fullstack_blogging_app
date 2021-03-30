@@ -2,6 +2,7 @@ const { ValidationError, RequestParamError } = require("../errors");
 const { ObjectID } = require("mongodb");
 const User = require("./User");
 const postsCollection = require("../db").db().collection("posts");
+const sanitizeHTML = require("sanitize-html");
 
 class Post {
   static async reusablePostQuery(uniqueOperations) {
@@ -80,8 +81,8 @@ class Post {
 
     // Remove bogus properties
     this.data = {
-      title: data.title ? data.title.trim() : "",
-      body: data.body ? data.body.trim() : "",
+      title: data.title ? sanitizeHTML(data.title.trim()) : "",
+      body: data.body ? sanitizeHTML(data.body.trim()) : "",
     };
   }
 
@@ -108,7 +109,8 @@ class Post {
     this.cleanUp();
     this.validate();
     this.addMetaData();
-    await postsCollection.insertOne(this.data);
+    let result = await postsCollection.insertOne(this.data);
+    return result.insertedId;
   }
 
   async update() {

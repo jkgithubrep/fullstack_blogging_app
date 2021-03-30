@@ -2,6 +2,7 @@ const express = require("express");
 const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
 const flash = require("connect-flash");
+const markdown = require("marked");
 const router = require("./router");
 
 const app = express();
@@ -47,15 +48,19 @@ app.set("views", "views");
 app.set("view engine", "ejs");
 
 /**
- * Add middleware to store user session info in the response local variable
+ * Add middleware to store several infos in the response locals variable
  * and therefore make it available to the views rendered during that request /
  * response cycle.
  */
 app.use(function (req, res, next) {
+  res.locals.renderMarkdown = function (content) {
+    return markdown(content);
+  };
   res.locals.errors = req.flash("errors");
   res.locals.success = req.flash("success");
-  req.visitorId = req.session.user ? req.session.user.userId : 0;
   res.locals.user = req.session.user;
+
+  req.visitorId = req.session.user ? req.session.user.userId : 0;
   next();
 });
 

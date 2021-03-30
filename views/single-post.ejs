@@ -18,10 +18,10 @@
 
     <p class="text-muted small mb-4">
     <a href="#"><img class="avatar-tiny" src="<%= post.author.gravatar %>"></a>
-      Posted by <a href="#"><%= post.author.username %></a> on <%= post.dateFormatted %></p>
+    Posted by <a href="/profile/<%= post.author.username %>"><%= post.author.username %></a> on <%= post.dateFormatted %></p>
 
     <div class="body-content">
-      <%= post.body %>
+      <%- renderMarkdown(post.body) %>
     </div>
 
   </div>

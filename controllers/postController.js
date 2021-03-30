@@ -9,8 +9,8 @@ exports.create = function (req, res) {
   const post = new Post(req.body, req.session.user.userId);
   post
     .create()
-    .then(() => {
-      res.send("Post successfully created");
+    .then((postId) => {
+      res.redirect(`/post/${postId}`);
     })
     .catch((err) => {
       if (err instanceof ValidationError) {
