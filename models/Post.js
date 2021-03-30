@@ -126,6 +126,10 @@ class Post {
       }
     );
   }
+
+  async delete() {
+    await postsCollection.findOneAndDelete({ _id: this.requestedPostId });
+  }
 }
 
 module.exports = Post;

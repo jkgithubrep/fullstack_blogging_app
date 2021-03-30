@@ -94,3 +94,27 @@ exports.edit = async function (req, res) {
     }
   }
 };
+
+exports.delete = async function (req, res) {
+  try {
+    let post = await Post.findSingleById(req.params.id, req.visitorId);
+    if (!post.data.isOwnedByVisitor) {
+      throw new ValidationError(
+        "You do not have the permission to perform that action"
+      );
+    }
+    await post.delete();
+    req.flash("success", "Post successfully deleted");
+    req.session.save(() =>
+      res.redirect(`/profile/${post.data.author.username}`)
+    );
+  } catch (err) {
+    if (err instanceof RequestParamError || err instanceof ValidationError) {
+      req.flash("errors", err.message);
+    } else {
+      req.flash("errors", "Please try again later");
+      console.log(err);
+    }
+    req.session.save(() => res.redirect("/"));
+  }
+};
