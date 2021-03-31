@@ -5,7 +5,7 @@ const postsCollection = require("../db").db().collection("posts");
 const sanitizeHTML = require("sanitize-html");
 
 class Post {
-  static async reusablePostQuery(uniqueOperations) {
+  static async reusablePostQuery(uniqueOperations, finalOperations = []) {
     const commonOperations = [
       {
         $lookup: {
@@ -33,7 +33,11 @@ class Post {
         },
       },
     ];
-    const aggOperations = [...uniqueOperations, ...commonOperations];
+    const aggOperations = [
+      ...uniqueOperations,
+      ...commonOperations,
+      ...finalOperations,
+    ];
     const posts = await postsCollection.aggregate(aggOperations).toArray();
     return posts;
   }
@@ -62,14 +66,19 @@ class Post {
     ]);
   }
 
-  static async findByTitle(pattern) {
-    let posts = await this.reusablePostQuery([
-      { $match: { title: { $regex: new RegExp(pattern), $options: "i" } } },
-    ]);
+  static async search(pattern) {
+    if (typeof pattern !== "string")
+      throw new RequestParamError("Invalid search pattern.");
+    let posts = await this.reusablePostQuery(
+      [{ $match: { $text: { $search: pattern } } }],
+      [{ $sort: { score: { $meta: "textScore" } } }]
+    );
     posts.forEach((post, index) => {
       post.author.gravatar = new User({
         email: post.author.email,
       }).getGravatar().gravatar;
+      post.author._id = undefined;
+      post.author.email = undefined;
       posts[index] = new Post(post);
       posts[index].formatDateForDisplay();
     });
@@ -78,10 +87,10 @@ class Post {
 
   constructor(data, userId, requestedPostId) {
     this.data = data;
-    this.userId = userId ? new ObjectID(userId) : null;
+    this.userId = userId ? new ObjectID(userId) : undefined;
     this.requestedPostId = requestedPostId
       ? new ObjectID(requestedPostId)
-      : null;
+      : undefined;
   }
 
   cleanUp() {

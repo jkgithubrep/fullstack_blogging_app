@@ -121,9 +121,10 @@ exports.delete = async function (req, res) {
 
 exports.search = async function (req, res) {
   try {
-    let posts = await Post.findByTitle(req.body.searchTerms);
+    let posts = await Post.search(req.body.searchTerms);
     res.send(posts);
   } catch (err) {
     console.log(err);
+    res.sendStatus(404);
   }
 };
