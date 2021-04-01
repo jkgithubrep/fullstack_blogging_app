@@ -1,12 +1,12 @@
-    <%- include("partials/profile-shared") %>
+  <%- include("partials/profile-shared")%>
 
-    <div class="list-group">
-    <% posts.forEach(function(post) { %>
+  <div class="list-group">
+    <% followers.forEach(function(post) { %>
       <a href="/post/<%= post._id %>" class="list-group-item list-group-item-action">
         <img class="avatar-tiny" src="<%= profile.gravatar %>">
         <strong><%= post.title %></strong> on <%= post.createdDate.getDate() %>/<%= post.createdDate.getMonth() + 1 %>/<%= post.createdDate.getFullYear() %>
       </a>
     <% }) %>
-    </div>
+  </div>
 
 <%- include('partials/footer') %>

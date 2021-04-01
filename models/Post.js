@@ -1,6 +1,7 @@
 const { ValidationError, RequestParamError } = require("../errors");
 const { ObjectID } = require("mongodb");
 const User = require("./User");
+const Follow = require("./Follow");
 const postsCollection = require("../db").db().collection("posts");
 const sanitizeHTML = require("sanitize-html");
 
@@ -66,6 +67,20 @@ class Post {
     ]);
   }
 
+  static async getFeed(userId) {
+    let followingIds = await Follow.getFollowingIds(ObjectID(userId));
+    let feed = await this.reusablePostQuery([
+      { $match: { author: { $in: followingIds } } },
+      { $sort: { createdDate: -1 } },
+    ]);
+    feed.forEach((post) => {
+      post.author.gravatar = new User({
+        email: post.author.email,
+      }).getGravatar().gravatar;
+    });
+    return feed;
+  }
+
   static async search(pattern) {
     if (typeof pattern !== "string")
       throw new RequestParamError("Invalid search pattern.");
@@ -83,6 +98,10 @@ class Post {
       posts[index].formatDateForDisplay();
     });
     return posts;
+  }
+
+  static async countPosts(userId) {
+    return postsCollection.find({ author: userId }).count();
   }
 
   constructor(data, userId, requestedPostId) {

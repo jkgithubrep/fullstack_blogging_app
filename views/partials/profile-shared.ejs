@@ -1,0 +1,31 @@
+<%- include('header') %>
+
+  <div class="container py-md-5 container--narrow">
+
+    <%- include("flash-messages") %>
+
+    <h2><img class="avatar-small" src="<%= profile.gravatar %>"> <%= profile.username %>
+      <% if (!isVisitorOwnProfile) { %>
+        <% if (visitorFollowing) { %>
+          <form class="ml-2 d-inline" action="/removeFollow/<%= profile.username %>" method="POST">
+            <button class="btn btn-danger btn-sm">Stop Following <i class="fas fa-user-times"></i></button>
+          </form>
+        <% } else { %>
+          <form class="ml-2 d-inline" action="/addFollow/<%= profile.username %>" method="POST">
+            <button class="btn btn-primary btn-sm">Follow <i class="fas fa-user-plus"></i></button>
+          </form>
+        <% }%>
+      <% }%>
+    </h2>
+
+    <div class="profile-nav nav nav-tabs pt-2 mb-4">
+      <a href="/profile/<%= profile.username %>" class="profile-nav-link nav-item nav-link <%= view === 'posts' ? 'active': ''%>">
+        Posts: <%= profile.countPosts %>
+      </a>
+      <a href="/profile/<%= profile.username %>/followers" class="profile-nav-link nav-item nav-link <%= view === 'followers' ? 'active': ''%>">
+        Followers: <%= profile.countFollowers %>
+      </a>
+      <a href="/profile/<%= profile.username %>/following" class="profile-nav-link nav-item nav-link <%= view === "following" ? "active": ""%>">
+        Following: <%= profile.countFollowing %>
+      </a>
+    </div>

@@ -1,6 +1,7 @@
 const { ValidationError } = require("../errors");
 const Post = require("../models/Post");
 const User = require("../models/User");
+const Follow = require("../models/Follow");
 
 function saveSessionAfterLoginOrRegister(req, res, user) {
   req.session.user = {
@@ -37,13 +38,19 @@ exports.mustBeLoggedIn = function (req, res, next) {
   }
 };
 
-exports.home = function (req, res) {
-  if (req.session.user) {
-    res.render("home-dashboard");
-  } else {
-    res.render("home-guest", {
-      regErrors: req.flash("regErrors"),
-    });
+exports.home = async function (req, res) {
+  try {
+    if (req.session.user) {
+      let feed = await Post.getFeed(req.session.user.userId);
+      res.render("home-dashboard", { feed: feed });
+    } else {
+      res.render("home-guest", {
+        regErrors: req.flash("regErrors"),
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.render("404");
   }
 };
 
@@ -79,9 +86,9 @@ exports.logout = function (req, res) {
 
 exports.ifUserExists = async function (req, res, next) {
   try {
-    let userFound = await User.findUserByUsername(req.params.username);
-    if (userFound) {
-      req.userFound = userFound;
+    let requestedProfile = await User.findUserByUsername(req.params.username);
+    if (requestedProfile) {
+      req.requestedProfile = requestedProfile;
       next();
     }
   } catch (err) {
@@ -90,11 +97,85 @@ exports.ifUserExists = async function (req, res, next) {
   }
 };
 
+exports.sharedProfileData = async function (req, res, next) {
+  try {
+    let requestedProfileId = req.requestedProfile._id;
+    req.isVisitorOwnProfile = req.visitorId
+      ? requestedProfileId.equals(req.visitorId)
+      : false;
+    if (req.visitorId) {
+      req.visitorIsFollowingRequestedProfile = await Follow.isFollowing(
+        requestedProfileId,
+        req.visitorId
+      );
+    }
+    [
+      req.requestedProfile.countPosts,
+      req.requestedProfile.countFollowers,
+      req.requestedProfile.countFollowing,
+    ] = await Promise.all([
+      Post.countPosts(requestedProfileId),
+      Follow.countFollowers(requestedProfileId),
+      Follow.countFollowing(requestedProfileId),
+    ]);
+    next();
+  } catch (err) {
+    console.log(err);
+    res.render("404");
+  }
+};
+
 exports.displayProfileScreen = async function (req, res) {
   try {
-    if (req.userFound) {
-      const userPosts = await Post.findByAuthorId(req.userFound._id);
-      res.render("profile", { profile: req.userFound, posts: userPosts });
+    if (req.requestedProfile) {
+      const userPosts = await Post.findByAuthorId(req.requestedProfile._id);
+      res.render("profile", {
+        view: "posts",
+        profile: req.requestedProfile,
+        posts: userPosts,
+        visitorFollowing: req.visitorIsFollowingRequestedProfile,
+        isVisitorOwnProfile: req.isVisitorOwnProfile,
+      });
+    } else {
+      res.render("404");
+    }
+  } catch (err) {
+    console.log(err);
+    res.render("404");
+  }
+};
+
+exports.displayFollowersScreen = async function (req, res) {
+  try {
+    if (req.requestedProfile) {
+      const followers = await Follow.getFollowers(req.requestedProfile._id);
+      res.render("profile-linked", {
+        view: "followers",
+        profile: req.requestedProfile,
+        linkedProfiles: followers,
+        visitorFollowing: req.visitorIsFollowingRequestedProfile,
+        isVisitorOwnProfile: req.isVisitorOwnProfile,
+      });
+    } else {
+      res.render("404");
+    }
+  } catch (err) {
+    console.log(err);
+    res.render("404");
+  }
+};
+
+exports.displayFollowingScreen = async function (req, res) {
+  try {
+    if (req.requestedProfile) {
+      const following = await Follow.getFollowing(req.requestedProfile._id);
+      res.render("profile-linked", {
+        view: "following",
+        profile: req.requestedProfile,
+        linkedProfiles: following,
+        visitorFollowing: req.visitorIsFollowingRequestedProfile,
+        isVisitorOwnProfile: req.isVisitorOwnProfile,
+      });
     } else {
       res.render("404");
     }
