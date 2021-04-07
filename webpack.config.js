@@ -1,25 +1,26 @@
-const path = require('path')
-const webpack = require('webpack')
+const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
-  entry: './frontend-js/main.js',
+  entry: "./frontend-js/main.js",
   output: {
-    filename: 'main-bundled.js',
-    path: path.resolve(__dirname, 'public')
+    filename: "main-bundled.js",
+    path: path.resolve(__dirname, "public"),
   },
-  mode: "production",
+  mode: "development",
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
           options: {
-            presets: ['@babel/preset-env']
-          }
-        }
-      }
-    ]
-  }
-}
+            presets: ["@babel/preset-env"],
+            plugins: ["@babel/plugin-transform-runtime"],
+          },
+        },
+      },
+    ],
+  },
+};

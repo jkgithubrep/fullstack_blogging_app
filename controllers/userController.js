@@ -184,3 +184,21 @@ exports.displayFollowingScreen = async function (req, res) {
     res.render("404");
   }
 };
+
+exports.doesUsernameExist = async function (req, res) {
+  try {
+    await User.findUserByUsername(req.body.username);
+    res.json(true);
+  } catch (err) {
+    res.json(false);
+  }
+};
+
+exports.doesEmailExist = async function (req, res) {
+  try {
+    await User.findUserByEmail(req.body.email);
+    res.json(true);
+  } catch (err) {
+    res.json(false);
+  }
+};
