@@ -6,6 +6,7 @@ export default class FormValidation {
       "#registration-form .form-control"
     );
     this.insertValidationMessageElements();
+    this.csrfToken = document.querySelector('[name="_csrf"]').value;
     this.username = document.getElementById("username-register");
     this.username.previousValue = "";
     this.username.errors = false;
@@ -72,6 +73,7 @@ export default class FormValidation {
   async usernameDeferedValidation() {
     try {
       let response = await axios.post("/doesUsernameExist", {
+        _csrf: this.csrfToken,
         username: this.username.value,
       });
       const usernameExists = response.data;
@@ -105,6 +107,7 @@ export default class FormValidation {
     } else {
       try {
         let response = await axios.post("/doesEmailExist", {
+          _csrf: this.csrfToken,
           email: this.email.value,
         });
         const emailExists = response.data;

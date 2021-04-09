@@ -4,6 +4,7 @@ const MongoStore = require("connect-mongo")(session);
 const flash = require("connect-flash");
 const markdown = require("marked");
 const router = require("./router");
+const csrf = require("csurf");
 
 const app = express();
 
@@ -52,6 +53,9 @@ app.set("view engine", "ejs");
  * and therefore make it available to the views rendered during that request /
  * response cycle.
  */
+
+app.use(csrf());
+
 app.use(function (req, res, next) {
   res.locals.renderMarkdown = function (content) {
     return markdown(content);
@@ -59,9 +63,23 @@ app.use(function (req, res, next) {
   res.locals.errors = req.flash("errors");
   res.locals.success = req.flash("success");
   res.locals.user = req.session.user;
+  res.locals.csrfToken = req.csrfToken();
 
   req.visitorId = req.session.user ? req.session.user.userId : 0;
   next();
+});
+
+app.use(function (err, req, res, next) {
+  if (err) {
+    if (err.code === "EBADCSRFTOKEN") {
+      req.flash("errors", "Cross-site request scripting not allowed.");
+      req.session.save(() => res.redirect("/"));
+    } else {
+      res.render("404");
+    }
+  } else {
+    next();
+  }
 });
 
 // App will handle requests using the router defined in router.js.

@@ -12,6 +12,7 @@ export default class Search {
 
   constructor() {
     this.injectSearchOverlayHTML();
+    this.csrfToken = document.querySelector('[name="_csrf"]').value;
     this.headerSearchIcon = document.querySelector(".header-search-icon");
     this.searchOverlay = document.querySelector(".search-overlay");
     this.searchOverlayCloseIcon = this.searchOverlay.querySelector(
@@ -164,7 +165,10 @@ export default class Search {
       this.displayLoaderIcon();
       this.waitBeforeSearchRequest = setTimeout(() => {
         axios
-          .post("/search", { searchTerms: currentInputValue })
+          .post("/search", {
+            _csrf: this.csrfToken,
+            searchTerms: currentInputValue,
+          })
           .then((response) => this.renderResults(response.data))
           .catch((err) => {
             console.log(err);
