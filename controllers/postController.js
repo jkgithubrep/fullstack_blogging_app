@@ -1,4 +1,5 @@
 const Post = require("../models/Post");
+const User = require("../models/User");
 const { ValidationError, RequestParamError } = require("../errors");
 
 exports.displayCreateScreen = function (req, res) {
@@ -22,6 +23,23 @@ exports.create = function (req, res) {
       req.session.save(() => {
         res.redirect("/create-post", { errors: req.flash("errors") });
       });
+    });
+};
+
+exports.apiCreate = function (req, res) {
+  const post = new Post(req.body, req.apiUser._id);
+  post
+    .create()
+    .then((postId) => {
+      res.json(`Post ${postId} successfully created.`);
+    })
+    .catch((err) => {
+      let errorMessage = err.message;
+      if (!(err instanceof ValidationError)) {
+        errorMessage = "Please try again later.";
+        console.log(err);
+      }
+      res.json(errorMessage);
     });
 };
 
@@ -119,6 +137,26 @@ exports.delete = async function (req, res) {
   }
 };
 
+exports.apiDelete = async function (req, res) {
+  try {
+    let post = await Post.findSingleById(req.params.id, req.apiUser._id);
+    if (!post.data.isOwnedByVisitor) {
+      throw new ValidationError(
+        "You do not have the permission to perform that action"
+      );
+    }
+    await post.delete();
+    res.json("Post successfully deleted.");
+  } catch (err) {
+    let errorMessage = err.message;
+    if (!(err instanceof RequestParamError || err instanceof ValidationError)) {
+      errorMessage = "Please, try again later.";
+      console.log(err);
+    }
+    res.json(errorMessage);
+  }
+};
+
 exports.search = async function (req, res) {
   try {
     let posts = await Post.search(req.body.searchTerms);
@@ -126,5 +164,15 @@ exports.search = async function (req, res) {
   } catch (err) {
     console.log(err);
     res.sendStatus(404);
+  }
+};
+
+exports.getPostsByAuthor = async function (req, res) {
+  try {
+    const userFound = await User.findUserByUsername(req.params.username);
+    const posts = await Post.findByAuthorId(userFound._id);
+    res.json(posts);
+  } catch (err) {
+    res.json("Invalid request.");
   }
 };

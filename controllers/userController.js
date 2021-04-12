@@ -1,4 +1,5 @@
 const { ValidationError } = require("../errors");
+const jwt = require("jsonwebtoken");
 const Post = require("../models/Post");
 const User = require("../models/User");
 const Follow = require("../models/Follow");
@@ -35,6 +36,15 @@ exports.mustBeLoggedIn = function (req, res, next) {
     req.session.save(() => {
       res.redirect("/");
     });
+  }
+};
+
+exports.apiMustBeLoggedIn = function (req, res, next) {
+  try {
+    req.apiUser = jwt.verify(req.body.token, process.env.JWTSECRET);
+    next();
+  } catch {
+    res.json("Invalid token.");
   }
 };
 
@@ -75,6 +85,21 @@ exports.login = function (req, res) {
     })
     .catch((err) => {
       handleErrorWhenLoginOrRegister(req, res, err, "login");
+    });
+};
+
+exports.apiLogin = function (req, res) {
+  const user = new User(req.body);
+  user
+    .login()
+    .then(() => {
+      const userJwt = jwt.sign({ _id: user.data._id }, process.env.JWTSECRET, {
+        expiresIn: "7d",
+      });
+      res.json(userJwt);
+    })
+    .catch(() => {
+      res.json("Incorrect username or password");
     });
 };
 

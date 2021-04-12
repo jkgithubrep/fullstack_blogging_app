@@ -4,9 +4,26 @@ const MongoStore = require("connect-mongo")(session);
 const flash = require("connect-flash");
 const markdown = require("marked");
 const router = require("./router");
+const apiRouter = require("./router-api");
 const csrf = require("csurf");
 
 const app = express();
+
+/**
+ * Use built-in middleware to parse incoming requests with urlencoded payloads.
+ * A new body object containing the parsed data is populated on the request
+ * object after the middleware.
+ */
+app.use(express.urlencoded({ extended: false }));
+
+/**
+ * Use built-in middleware to parse incoming requests with JSON payloads.
+ * A new body object containing the parsed data is populated on the request
+ * object after the middleware.
+ */
+app.use(express.json());
+
+app.use("/api", apiRouter);
 
 // Use express-session middleware
 let sessionOptions = {
@@ -24,20 +41,6 @@ app.use(session(sessionOptions));
 
 // Use flash middleware to handle flash messages
 app.use(flash());
-
-/**
- * Use built-in middleware to parse incoming requests with urlencoded payloads.
- * A new body object containing the parsed data is populated on the request
- * object after the middleware.
- */
-app.use(express.urlencoded({ extended: false }));
-
-/**
- * Use built-in middleware to parse incoming requests with JSON payloads.
- * A new body object containing the parsed data is populated on the request
- * object after the middleware.
- */
-app.use(express.json());
 
 // Indicate express to use static files in the public folder.
 app.use(express.static("public"));
