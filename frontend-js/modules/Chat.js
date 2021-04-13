@@ -1,3 +1,5 @@
+import DOMPurify from "dompurify";
+
 export default class Chat {
   constructor() {
     this.chatOpenedOnce = false;
@@ -36,19 +38,48 @@ export default class Chat {
     this.socket.on("chatMessageFromServer", (data) =>
       this.displayChatMessage(data)
     );
+    this.socket.on("welcome", (data) => {
+      this.user = Object.assign(data);
+    });
   }
 
   handleNewMessageSubmitted(e) {
     e.preventDefault();
-    this.socket.emit("chatMessageFromBrowser", {
+    let data = {
       message: this.chatInput.value,
-    });
+    };
+    this.socket.emit("chatMessageFromBrowser", data);
+    this.displayChatMessage({ ...data, ...this.user }, false);
     this.chatInput.value = "";
     this.chatInput.focus();
   }
 
-  displayChatMessage(data) {
-    this.chatLog.insertAdjacentHTML("beforeend", `<p>${data.message}</p>`);
+  displayChatMessage(data, isFromOther = true) {
+    let chatMessageHTML = DOMPurify.sanitize(
+      isFromOther
+        ? `
+      <div class="chat-other">
+        <a href="/profile/${data.username}"><img class="avatar-tiny" src="${data.gravatar}"></a>
+        <div class="chat-message"><div class="chat-message-inner">
+          <a href="/profile/${data.username}"><strong>${data.username}</strong></a>
+         ${data.message}
+        </div></div>
+      </div>
+      `
+        : `
+      <div class="chat-self">
+        <div class="chat-message">
+          <div class="chat-message-inner">
+            ${data.message}
+          </div>
+        </div>
+        <img class="chat-avatar avatar-tiny" src="${data.gravatar}">
+      </div>
+      `
+    );
+
+    this.chatLog.insertAdjacentHTML("beforeend", chatMessageHTML);
+    this.chatLog.scrollTop = this.chatLog.scrollHeight;
   }
 
   injectHTML() {

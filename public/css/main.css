@@ -422,6 +422,7 @@ textarea.tall-textarea {
   border-radius: 12px;
   background-color: #007bff;
   color: #fff;
+  word-break: break-word;
 }
 
 .chat-other {
@@ -442,6 +443,7 @@ textarea.tall-textarea {
   padding: 4px 7px;
   border-radius: 12px;
   background-color: #f1f0f0;
+  word-break: break-word;
 }
 
 .chat-message a {

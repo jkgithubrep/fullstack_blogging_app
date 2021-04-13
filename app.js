@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require("express-session");
+const sanitizeHTML = require("sanitize-html");
 const MongoStore = require("connect-mongo")(session);
 const flash = require("connect-flash");
 const markdown = require("marked");
@@ -37,7 +38,10 @@ let sessionOptions = {
     sameSite: true,
   },
 };
-app.use(session(sessionOptions));
+let sessionMiddleware = session(sessionOptions);
+
+// Make our app use the session middleware
+app.use(sessionMiddleware);
 
 // Use flash middleware to handle flash messages
 app.use(flash());
@@ -89,13 +93,33 @@ app.use(function (err, req, res, next) {
 app.use("/", router);
 
 const server = require("http").createServer(app);
-
 const io = require("socket.io")(server);
 
+// Make Express session data available in the context of socket.io
+io.use(function (socket, next) {
+  sessionMiddleware(socket.request, socket.request.res, next);
+});
+
 io.on("connection", (socket) => {
-  socket.on("chatMessageFromBrowser", (data) => {
-    socket.broadcast.emit("chatMessageFromServer", { message: data.message });
-  });
+  if (socket.request.session.user) {
+    const user = socket.request.session.user;
+
+    socket.emit("welcome", {
+      username: user.username,
+      gravatar: user.gravatar,
+    });
+
+    socket.on("chatMessageFromBrowser", (data) => {
+      socket.broadcast.emit("chatMessageFromServer", {
+        message: sanitizeHTML(data.message, {
+          allowedTags: [],
+          allowedAttributes: {},
+        }),
+        username: user.username,
+        gravatar: user.gravatar,
+      });
+    });
+  }
 });
 
 module.exports = server;
