@@ -88,4 +88,14 @@ app.use(function (err, req, res, next) {
 // App will handle requests using the router defined in router.js.
 app.use("/", router);
 
-module.exports = app;
+const server = require("http").createServer(app);
+
+const io = require("socket.io")(server);
+
+io.on("connection", (socket) => {
+  socket.on("chatMessageFromBrowser", (data) => {
+    socket.broadcast.emit("chatMessageFromServer", { message: data.message });
+  });
+});
+
+module.exports = server;

@@ -3,6 +3,13 @@
   <p class="m-0">Copyright &copy; <%= new Date().getFullYear() %> <a href="/" class="text-muted">OurApp</a>. All rights reserved.</p>
 </footer>
 
+  <% if (user) { %>
+    <!-- chat feature begins -->
+    <div id="chat-wrapper" class="chat-wrapper shadow border-top border-left border-right"></div>
+    <!-- chat feature ends -->
+    <script src="/socket.io/socket.io.js"></script>
+  <% } %>
+
 <script src="/js/jquery.js"></script>
 <script src="/js/bootstrap.js"></script>
 <script src="/main-bundled.js"></script>
