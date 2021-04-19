@@ -7,7 +7,7 @@ module.exports = {
     filename: "main-bundled.js",
     path: path.resolve(__dirname, "public"),
   },
-  mode: "development",
+  mode: "production",
   module: {
     rules: [
       {

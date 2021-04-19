@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "build": "webpack --mode production",
     "start": "node db.js",
     "watch": "nodemon --ignore frontend-js --ignore public/ db & webpack --watch"
   },
