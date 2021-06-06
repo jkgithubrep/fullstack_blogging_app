@@ -4,6 +4,8 @@ This is my first fullstack project based on course I followed on Udemy called [L
 
 It is a blogging platform where users can follow each others and thus have a personalized feed of posts.
 
+![Feed](https://raw.githubusercontent.com/jkgithubrep/fullstack_blogging_app/master/screenshots/feed.png?token=AIYJVRDFGTA3LPPSGHNOMETAYXU6G)
+
 ## Table of content
 
 1. [Stack](#stack)
